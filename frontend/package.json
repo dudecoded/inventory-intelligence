@@ -19,10 +19,5 @@
     "typescript": "~5.7.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5"
-  },
-  "overrides": {
-    "picomatch": "^4.0.8",
-    "fdir": "^6.5.0",
-    "tinyglobby": "^0.2.15"
   }
 }
