@@ -24,6 +24,14 @@ class ProductCreate(BaseModel):
  demand_30d:float=Field(default=0,ge=0)
  unit_cost:float=Field(default=0,ge=0)
  lead_time_days:int=Field(default=7,ge=0)
+class ProductUpdate(BaseModel):
+ sku:Optional[str]=Field(default=None,min_length=1,max_length=80)
+ name:Optional[str]=Field(default=None,min_length=1,max_length=200)
+ category:Optional[str]=None
+ stock:Optional[int]=Field(default=None,ge=0)
+ demand_30d:Optional[float]=Field(default=None,ge=0)
+ unit_cost:Optional[float]=Field(default=None,ge=0)
+ lead_time_days:Optional[int]=Field(default=None,ge=0)
 class ProductOut(ProductCreate):
  id:int
  model_config=ConfigDict(from_attributes=True)
