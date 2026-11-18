@@ -1,17 +1,25 @@
-# Inventory Intelligence
+# Stockwise — Inventory Intelligence
 
-Inventory decision-support application combining product management, demand forecasting baselines, inventory risk analysis, and replenishment planning.
+Inventory decision-support platform for small businesses and operations teams. The hackathon demo combines product catalogue management, stock risk heuristics, replenishment suggestions, and a transparent forecasting lab.
 
-## Current implementation
-- React dashboard with dark neon-inspired UI, responsive layout, login/register, account profile.
-- FastAPI API with password hashing, signed bearer tokens, profile update, user-scoped product CRUD/stock adjustment.
-- SQLite persistence by default.
-- ML baseline forecast endpoint: scikit-learn linear trend blended with recent moving average.
-- Inventory risk: transparent stock coverage heuristic.
-- Procurement recommendation: lead-time demand + safety buffer.
-- CSV export, search, stock status filtering, quick adjustments, forecast lab.
+## What works today
+- Email/password registration and login; passwords are stored using scrypt, not plaintext.
+- Signed bearer tokens with expiry.
+- User-scoped inventory CRUD, stock adjustments, and archive.
+- SKU normalization and duplicate checks within a workspace.
+- Inventory valuation from on-hand quantity × unit cost.
+- Stock coverage / reorder recommendations with explicit assumptions.
+- Forecast lab that compares naive, moving-average, and linear-trend baselines using a chronological holdout.
+- CSV export with formula-injection protection.
+- Backend API integration tests and frontend production build in CI.
 
-**Model caveat:** There is no real historical dataset or trained production model in this repository. Forecast/risk/replenishment components are baseline decision-support logic. Demo workspace sample products are illustrative.
+## Important limitations
+This is a hackathon prototype, not a production inventory system. Demo inventory is illustrative and may be seeded into a new workspace. The chart on the Overview page is sample visualization and is not connected to sales history. The forecast lab accepts manually entered observations; it is not trained on a real business dataset. Stock risk and reorder quantities are transparent heuristics, not optimized or probabilistic decisions. Supplier, integrations, and some analytics screens remain UI placeholders.
+
+## Stack
+- Frontend: React, TypeScript, Vite, CSS
+- Backend: FastAPI, SQLAlchemy, SQLite by default
+- ML: NumPy and scikit-learn baselines
 
 ## Run locally
 
@@ -35,8 +43,29 @@ npm run dev
 ```
 Open the Vite URL printed by the command.
 
-## Environment
-Backend `SECRET_KEY` must be changed to a long random secret before deployment. Frontend `VITE_API_URL` defaults to `http://localhost:8000/api/v1`.
+## Environment configuration
+Backend variables are in `backend/.env.example`. Before deploying, set a strong random `SECRET_KEY`, production environment, and explicit CORS origins. The app rejects the development secret in production mode.
 
-## Evaluation roadmap
-Use dated SKU sales and stockout-aware observations; validate forecasts with chronological splits; compare baseline models; report MAE/RMSE/WAPE/MASE and bias; add calibrated prediction intervals; test replenishment against budget, lead-time, MOQ and supplier constraints.
+Frontend `VITE_API_URL` defaults to `http://localhost:8000/api/v1`.
+
+## Roadmap to production-grade inventory intelligence
+1. Import transaction-level sales with timestamps and stockout flags.
+2. Build demand forecasting with time-series cross-validation, intermittent-demand methods, seasonality and prediction interval calibration.
+3. Replace simple inventory coverage rules with service-level-aware safety stock.
+4. Add supplier, purchase-order, MOQ, budget, and lead-time data.
+5. Implement constrained replenishment optimization and simulate against historical demand.
+6. Add data migrations, rate limiting, refresh/revocable sessions, audit logs, roles, and deployment observability.
+7. Validate with real users and measure stockout reduction, waste reduction, and cash tied in inventory.
+
+## Tests
+Backend:
+```powershell
+cd backend
+pytest -q
+```
+Frontend production build:
+```powershell
+cd frontend
+npm run build
+```
+CI runs both checks on pushes and pull requests.
