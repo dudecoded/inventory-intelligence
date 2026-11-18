@@ -12,7 +12,8 @@ def current_user(credentials:HTTPAuthorizationCredentials|None=Depends(bearer),d
  if not credentials:raise HTTPException(401,"Authentication required")
  subject=decode_access_token(credentials.credentials)
  if not subject:raise HTTPException(401,"Invalid or expired token")
- try:user=db.get(User,int(subject))\n except (TypeError,ValueError):user=None
+ try:user=db.get(User,int(subject))
+ except (TypeError,ValueError):user=None
  if not user:raise HTTPException(401,"User not found")
  return user
 @api_router.get("/status",tags=["health"])
