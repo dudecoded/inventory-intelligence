@@ -12,7 +12,7 @@ def current_user(credentials:HTTPAuthorizationCredentials|None=Depends(bearer),d
  if not credentials:raise HTTPException(401,"Authentication required")
  subject=decode_access_token(credentials.credentials)
  if not subject:raise HTTPException(401,"Invalid or expired token")
- user=db.get(User,int(subject))
+ try:user=db.get(User,int(subject))\n except (TypeError,ValueError):user=None
  if not user:raise HTTPException(401,"User not found")
  return user
 @api_router.get("/status",tags=["health"])
@@ -42,7 +42,14 @@ def list_products(user:User=Depends(current_user),db:Session=Depends(get_db)):
 def create_product(payload:ProductCreate,user:User=Depends(current_user),db:Session=Depends(get_db)):
  if db.scalar(select(Product).where(Product.sku==payload.sku,Product.owner_id==user.id)):raise HTTPException(409,"SKU already exists")
  product=Product(**payload.model_dump(),owner_id=user.id);db.add(product);db.commit();db.refresh(product);return product
-@api_router.patch("/products/{product_id}",response_model=ProductOut,tags=["inventory"])\ndef update_product(product_id:int,payload:ProductUpdate,user:User=Depends(current_user),db:Session=Depends(get_db)):\n product=db.scalar(select(Product).where(Product.id==product_id,Product.owner_id==user.id,Product.active==True))\n if not product:raise HTTPException(404,"Product not found")\n updates=payload.model_dump(exclude_unset=True)\n if "sku" in updates and db.scalar(select(Product).where(Product.sku==updates["sku"],Product.owner_id==user.id,Product.id!=product_id,Product.active==True)):raise HTTPException(409,"SKU already exists")\n for field,value in updates.items():setattr(product,field,value)\n db.commit();db.refresh(product);return product\n@api_router.patch("/products/{product_id}/stock",response_model=ProductOut,tags=["inventory"])
+@api_router.patch("/products/{product_id}",response_model=ProductOut,tags=["inventory"])
+def update_product(product_id:int,payload:ProductUpdate,user:User=Depends(current_user),db:Session=Depends(get_db)):
+ product=db.scalar(select(Product).where(Product.id==product_id,Product.owner_id==user.id,Product.active==True))
+ if not product:raise HTTPException(404,"Product not found")
+ updates=payload.model_dump(exclude_unset=True)
+ if "sku" in updates and db.scalar(select(Product).where(Product.sku==updates["sku"],Product.owner_id==user.id,Product.id!=product_id,Product.active==True)):raise HTTPException(409,"SKU already exists")
+ for field,value in updates.items():setattr(product,field,value)
+ db.commit();db.refresh(product);return product\n@api_router.patch("/products/{product_id}/stock",response_model=ProductOut,tags=["inventory"])
 def adjust_stock(product_id:int,payload:ProductAdjust,user:User=Depends(current_user),db:Session=Depends(get_db)):
  product=db.scalar(select(Product).where(Product.id==product_id,Product.owner_id==user.id,Product.active==True))
  if not product:raise HTTPException(404,"Product not found")
