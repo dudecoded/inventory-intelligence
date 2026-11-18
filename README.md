@@ -68,4 +68,4 @@ Frontend production build:
 cd frontend
 npm run build
 ```
-CI runs both checks on pushes and pull requests.
+CI runs backend tests, the frontend production build, and a production-dependency audit on pushes and pull requests. The dev-tool audit report may still flag the upstream Picomatch advisory; no upstream patched release is available as of this review.
