@@ -10,7 +10,7 @@ Inventory decision-support platform for small businesses and operations teams. T
 - Inventory valuation from on-hand quantity × unit cost.
 - Stock coverage / reorder recommendations with explicit assumptions.
 - Forecast lab that compares naive, moving-average, and linear-trend baselines using a chronological holdout.
-- CSV export with formula-injection protection.
+- CSV import/export with validation and formula-injection protection. Sample import template: `docs/inventory-import-template.csv`.
 - Backend API integration tests and frontend production build in CI.
 
 ## Important limitations
