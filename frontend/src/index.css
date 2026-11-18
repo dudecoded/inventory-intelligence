@@ -23,3 +23,25 @@
 .orbit-hint{position:absolute;right:8px;bottom:9px;color:#697167;font:7px "DM Mono",monospace;letter-spacing:1px}
 .sidebar .nav-label{margin:15px 10px 7px}.sidebar .tools-label{margin-top:13px}.sidebar .nav-item{padding:8px 10px;font-size:11px}.sidebar .upgrade-card{padding:10px}.sidebar .upgrade-card p{margin:4px 0 8px}
 @media(max-width:800px){.orbit-nav{height:255px}.orbit-ring{width:255px;height:255px;left:-134px;border-width:22px}.orbit-item{width:32px;height:32px;margin:-16px 0 0 -16px}.orbit-label{left:23px}}
+
+/* Layout update: navigation wheel is the sole sidebar element; rectangular menu lives in header */
+.sidebar{width:112px;padding:16px 0;align-items:center;justify-content:flex-start;overflow:hidden}
+.sidebar .brand,.sidebar .workspace-switcher,.sidebar .nav-label,.sidebar .sidebar-bottom{display:none!important}
+.sidebar .orbit-nav{width:112px;height:100%;min-height:320px;margin:0;flex:1;border:0;border-radius:0;background:transparent;overflow:visible}
+.sidebar .orbit-ring{left:-160px;top:50%;margin-top:-146px}
+.sidebar .orbit-center{left:-14px;top:50%}
+.sidebar .orbit-label{left:17px;top:50%;min-width:118px;padding:9px 12px;border-radius:0 24px 24px 0}
+.sidebar .orbit-hint{right:auto;left:12px;bottom:12px;writing-mode:vertical-rl;letter-spacing:2px}
+.main-area{margin-left:112px}
+.header-nav-slab{display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:10px 12px;border:1px solid #292c29;border-radius:15px;background:#111313;box-shadow:0 8px 22px #0002;min-height:62px}
+.header-nav-brand{display:flex;align-items:center;gap:8px;flex:0 0 auto;padding:0 8px 0 2px;color:#e8e9e6;font:800 14px Manrope,sans-serif;letter-spacing:-.5px}
+.header-nav-brand .brand-symbol{width:28px;height:28px;border-radius:8px}
+.header-nav-brand>span:last-child>span{color:var(--lime)}
+.horizontal-nav{display:flex;align-items:center;gap:4px;min-width:0;overflow-x:auto;scrollbar-width:none;flex:1}
+.horizontal-nav::-webkit-scrollbar{display:none}
+.horizontal-nav-item{display:flex;align-items:center;gap:7px;white-space:nowrap;padding:9px 11px;border:1px solid transparent;border-radius:9px;color:#929792;background:transparent;font-size:11px;transition:.2s}
+.horizontal-nav-item:hover{color:#e8e9e6;background:#202323}
+.horizontal-nav-item.active{color:#c9f77b;background:#263022;border-color:#384630;box-shadow:inset 0 -2px var(--lime)}
+@media(max-width:1050px){.header-nav-brand{display:none}.horizontal-nav-item{padding:8px 9px}}
+@media(max-width:800px){.sidebar{width:82px}.main-area{margin-left:82px}.sidebar .orbit-ring{left:-175px}.sidebar .orbit-label{left:12px;min-width:110px}.header-nav-slab{margin-bottom:10px;padding:7px}.horizontal-nav-item span{display:none}.horizontal-nav-item{padding:10px}.header-nav-brand{display:flex}}
+@media(max-width:520px){.sidebar{width:66px}.main-area{margin-left:66px;padding:12px}.sidebar .orbit-ring{left:-186px}.sidebar .orbit-label{left:8px;min-width:102px}.header-nav-slab{gap:6px}.header-nav-brand{font-size:12px;padding-right:2px}}
