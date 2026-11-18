@@ -1,45 +1,42 @@
 # Inventory Intelligence
 
-AI-powered inventory planning and decision-support platform combining demand forecasting, stock-risk analysis, and constrained replenishment recommendations.
+Inventory decision-support application combining product management, demand forecasting baselines, inventory risk analysis, and replenishment planning.
 
-## Planned capabilities
-- Product-level demand forecasting over configurable horizons.
-- Stockout, overstock, and slow-moving inventory signals.
-- Replenishment recommendations under budget, lead-time, and supplier constraints.
-- Dashboard for inventory KPIs, forecasts, alerts, and recommendations.
+## Current implementation
+- React dashboard with dark neon-inspired UI, responsive layout, login/register, account profile.
+- FastAPI API with password hashing, signed bearer tokens, profile update, user-scoped product CRUD/stock adjustment.
+- SQLite persistence by default.
+- ML baseline forecast endpoint: scikit-learn linear trend blended with recent moving average.
+- Inventory risk: transparent stock coverage heuristic.
+- Procurement recommendation: lead-time demand + safety buffer.
+- CSV export, search, stock status filtering, quick adjustments, forecast lab.
 
-## Architecture
-React + TypeScript → FastAPI → application services → ML forecasting / risk scoring / optimization → database.
+**Model caveat:** There is no real historical dataset or trained production model in this repository. Forecast/risk/replenishment components are baseline decision-support logic. Demo workspace sample products are illustrative.
 
-## Repository layout
-- `frontend/` — React client
-- `backend/` — FastAPI application and API contracts
-- `ml/` — preprocessing, forecasting, risk modelling, evaluation
-- `optimization/` — procurement optimization
-- `data/` — local datasets (not committed)
-- `notebooks/` — exploratory analysis
-- `docs/` — architecture and data contracts
+## Run locally
 
-## Backend quick start
-Requires Python 3.11+.
-```bash
+### Backend (PowerShell)
+```powershell
 cd backend
 python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
+.venv\Scripts\activate
 pip install -r requirements.txt
+copy .env.example .env
 uvicorn app.main:app --reload
 ```
 API docs: http://127.0.0.1:8000/docs
 
-## Frontend
-Requires Node.js 20+. See `frontend/README.md`.
+### Frontend
+```powershell
+cd frontend
+npm install
+copy .env.example .env
+npm run dev
+```
+Open the Vite URL printed by the command.
 
-## Configuration
-Copy `backend/.env.example` to `backend/.env`. Never commit credentials, API keys, database passwords, or real customer data. SQLite is the initial local-development default; PostgreSQL can be configured through `DATABASE_URL`.
+## Environment
+Backend `SECRET_KEY` must be changed to a long random secret before deployment. Frontend `VITE_API_URL` defaults to `http://localhost:8000/api/v1`.
 
-## Data and model integrity
-Use chronological train/validation/test splits for time-series evaluation. Do not present synthetic/demo results as real-world model performance. Recommendations must expose assumptions and constraints.
-
-## Status
-Foundation scaffold. Features and models will be implemented incrementally and validated with tests.
+## Evaluation roadmap
+Use dated SKU sales and stockout-aware observations; validate forecasts with chronological splits; compare baseline models; report MAE/RMSE/WAPE/MASE and bias; add calibrated prediction intervals; test replenishment against budget, lead-time, MOQ and supplier constraints.
