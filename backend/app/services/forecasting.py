@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 def forecast_series(history:list[float],horizon:int=7)->dict:
  values=np.asarray(history,dtype=float)
- if len(values)<3 or np.any(values<0):raise ValueError("Provide at least 3 non-negative historical observations.")
+ if len(values)<3 or not np.all(np.isfinite(values)) or np.any(values<0):raise ValueError("Provide at least 3 non-negative historical observations.")
  x=np.arange(len(values)).reshape(-1,1);model=LinearRegression().fit(x,values)
  future=np.arange(len(values),len(values)+horizon).reshape(-1,1)
  trend=np.maximum(model.predict(future),0);recent=float(np.mean(values[-min(7,len(values)):]))
