@@ -2,6 +2,27 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 
+def _predict(method: str, train: np.ndarray, horizon: int) -> np.ndarray:
+    if method == "Naive last value":
+        return np.repeat(float(train[-1]), horizon)
+    if method == "Recent moving average":
+        return np.repeat(float(np.mean(train[-min(7, len(train)): ])), horizon)
+    x = np.arange(len(train)).reshape(-1, 1)
+    future = np.arange(len(train), len(train) + horizon).reshape(-1, 1)
+    model = LinearRegression().fit(x, train)
+    return np.maximum(model.predict(future), 0)
+
+
+def _metrics(actual: np.ndarray, predicted: np.ndarray) -> dict:
+    errors = actual - predicted
+    mae = float(np.mean(np.abs(errors)))
+    rmse = float(np.sqrt(np.mean(errors ** 2)))
+    denominator = float(np.sum(np.abs(actual)))
+    wape = float(np.sum(np.abs(errors)) / denominator * 100) if denominator else None
+    bias = float(np.mean(predicted - actual))
+    return {"mae": round(mae, 3), "rmse": round(rmse, 3), "wape_percent": round(wape, 2) if wape is not None else None, "bias": round(bias, 3)}
+
+
 def forecast_series(history: list[float], horizon: int = 7) -> dict:
     values = np.asarray(history, dtype=float)
     if values.ndim != 1 or len(values) < 3:
@@ -11,22 +32,38 @@ def forecast_series(history: list[float], horizon: int = 7) -> dict:
     if not isinstance(horizon, int) or horizon < 1 or horizon > 90:
         raise ValueError("Forecast horizon must be between 1 and 90 days.")
 
-    x = np.arange(len(values)).reshape(-1, 1)
-    model = LinearRegression().fit(x, values)
-    future = np.arange(len(values), len(values) + horizon).reshape(-1, 1)
-    trend = np.maximum(model.predict(future), 0)
-    recent_window = min(7, len(values))
-    recent_mean = float(np.mean(values[-recent_window:]))
-    forecast = np.maximum(0.65 * trend + 0.35 * recent_mean, 0)
+    # Chronological holdout: reserve the most recent observations for model selection.
+    holdout_size = max(1, min(7, len(values) // 5))
+    train = values[:-holdout_size]
+    holdout = values[-holdout_size:]
+    if len(train) < 2:
+        train = values[:-1]
+        holdout = values[-1:]
 
-    fitted = model.predict(x)
-    mae = float(np.mean(np.abs(values - fitted)))
+    candidates = ["Naive last value", "Recent moving average", "Linear trend"]
+    evaluation = []
+    for method in candidates:
+        predictions = _predict(method, train, len(holdout))
+        evaluation.append({"model": method, **_metrics(holdout, predictions)})
+    selected = min(evaluation, key=lambda item: item["mae"])
+
+    final_forecast = _predict(selected["model"], values, horizon)
+    selected_holdout = _predict(selected["model"], train, len(holdout))
+    residuals = holdout - selected_holdout
+    uncertainty = float(np.sqrt(np.mean(residuals ** 2))) if len(residuals) else 0.0
+    lower = np.maximum(final_forecast - 1.96 * uncertainty, 0)
+    upper = final_forecast + 1.96 * uncertainty
+
     return {
-        "method": "Linear trend + recent moving-average blend",
-        "forecast": [round(float(value), 2) for value in forecast],
-        "mae": round(mae, 2),
-        "metric_label": "In-sample trend MAE",
-        "note": "Baseline only. This MAE is measured on training observations, not a holdout set. Validate with chronological holdout data before making purchasing decisions.",
+        "method": selected["model"],
+        "forecast": [round(float(value), 2) for value in final_forecast],
+        "lower_bound": [round(float(value), 2) for value in lower],
+        "upper_bound": [round(float(value), 2) for value in upper],
+        "evaluation": evaluation,
+        "validation": {"type": "chronological holdout", "observations": int(len(holdout))},
+        "metrics": {key: selected[key] for key in ("mae", "rmse", "wape_percent", "bias")},
+        "metric_label": "Holdout MAE",
+        "note": "Small-sample baseline comparison using a chronological holdout. The uncertainty band is an approximate residual-based interval, not a calibrated prediction interval. Validate on more historical data before business decisions.",
     }
 
 
