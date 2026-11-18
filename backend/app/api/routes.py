@@ -5,7 +5,7 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import hash_password,verify_password,create_access_token,decode_access_token
 from app.models import User,Product
-from app.schemas import RegisterRequest,LoginRequest,TokenOut,UserOut,UserUpdate,ProductCreate,ProductOut,ProductAdjust,ForecastRequest
+from app.schemas import RegisterRequest,LoginRequest,TokenOut,UserOut,UserUpdate,ProductCreate,ProductUpdate,ProductOut,ProductAdjust,ForecastRequest
 from app.services.forecasting import forecast_series,classify_stock,recommend_reorder
 api_router=APIRouter();bearer=HTTPBearer(auto_error=False)
 def current_user(credentials:HTTPAuthorizationCredentials|None=Depends(bearer),db:Session=Depends(get_db)):
@@ -42,9 +42,9 @@ def list_products(user:User=Depends(current_user),db:Session=Depends(get_db)):
 def create_product(payload:ProductCreate,user:User=Depends(current_user),db:Session=Depends(get_db)):
  if db.scalar(select(Product).where(Product.sku==payload.sku,Product.owner_id==user.id)):raise HTTPException(409,"SKU already exists")
  product=Product(**payload.model_dump(),owner_id=user.id);db.add(product);db.commit();db.refresh(product);return product
-@api_router.patch("/products/{product_id}/stock",response_model=ProductOut,tags=["inventory"])
+@api_router.patch("/products/{product_id}",response_model=ProductOut,tags=["inventory"])\ndef update_product(product_id:int,payload:ProductUpdate,user:User=Depends(current_user),db:Session=Depends(get_db)):\n product=db.scalar(select(Product).where(Product.id==product_id,Product.owner_id==user.id,Product.active==True))\n if not product:raise HTTPException(404,"Product not found")\n updates=payload.model_dump(exclude_unset=True)\n if "sku" in updates and db.scalar(select(Product).where(Product.sku==updates["sku"],Product.owner_id==user.id,Product.id!=product_id,Product.active==True)):raise HTTPException(409,"SKU already exists")\n for field,value in updates.items():setattr(product,field,value)\n db.commit();db.refresh(product);return product\n@api_router.patch("/products/{product_id}/stock",response_model=ProductOut,tags=["inventory"])
 def adjust_stock(product_id:int,payload:ProductAdjust,user:User=Depends(current_user),db:Session=Depends(get_db)):
- product=db.scalar(select(Product).where(Product.id==product_id,Product.owner_id==user.id))
+ product=db.scalar(select(Product).where(Product.id==product_id,Product.owner_id==user.id,Product.active==True))
  if not product:raise HTTPException(404,"Product not found")
  product.stock=max(0,product.stock+payload.delta);db.commit();db.refresh(product);return product
 @api_router.delete("/products/{product_id}",tags=["inventory"])
