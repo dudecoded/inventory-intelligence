@@ -111,3 +111,31 @@ def test_user_cannot_access_another_users_product(client):
 def test_authentication_required_for_inventory(client):
     assert client.get("/api/v1/products").status_code == 401
     assert client.get("/api/v1/dashboard/summary").status_code == 401
+
+def test_duplicate_email_registration_is_rejected_case_insensitively(client):
+    register(client, "Owner@Example.com")
+    response = client.post("/api/v1/auth/register", json={
+        "name": "Another Owner",
+        "email": "owner@example.com",
+        "password": "different-password",
+    })
+    assert response.status_code == 409
+
+
+def test_same_sku_is_allowed_for_different_workspaces(client):
+    first_token = register(client, "first@example.com")
+    second_token = register(client, "second@example.com")
+    for token in (first_token, second_token):
+        response = client.post("/api/v1/products", headers=auth(token), json={
+            "sku": "COMMON-SKU", "name": "Shared SKU label", "stock": 3,
+        })
+        assert response.status_code == 201
+
+
+def test_product_validation_rejects_negative_stock_and_cost(client):
+    token = register(client)
+    headers = auth(token)
+    for payload in ({"sku": "NEG-STOCK", "name": "Bad", "stock": -1},
+                    {"sku": "NEG-COST", "name": "Bad", "unit_cost": -1}):
+        response = client.post("/api/v1/products", headers=headers, json=payload)
+        assert response.status_code == 422
