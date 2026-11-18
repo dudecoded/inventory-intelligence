@@ -126,7 +126,14 @@ class ProductOut(BaseModel):
 
 
 class ProductAdjust(BaseModel):
-    delta: int = Field(ne=0, ge=-1000000, le=1000000)
+    delta: int = Field(ge=-1000000, le=1000000)
+
+    @field_validator("delta")
+    @classmethod
+    def reject_zero_adjustment(cls, value: int) -> int:
+        if value == 0:
+            raise ValueError("Stock adjustment must not be zero.")
+        return value
 
 
 class ForecastRequest(BaseModel):
