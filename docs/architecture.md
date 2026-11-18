@@ -1,18 +1,10 @@
 # Architecture
 
-## Request flow
-1. Frontend requests inventory and sales data from FastAPI.
-2. Backend validates inputs and retrieves relevant data.
-3. Forecasting estimates demand over a selected horizon.
-4. Risk analysis compares projected demand with available and incoming stock.
-5. Optimization proposes replenishment quantities under explicit constraints.
-6. API returns recommendations with metrics, assumptions, and explanations.
+React + TypeScript calls the versioned FastAPI API. Backend authentication uses signed bearer tokens and password hashes; SQLAlchemy persists users and products in SQLite by default. Inventory endpoints are user-scoped.
 
-## Boundaries
-- API: HTTP validation and response serialization.
-- Services: business workflows and orchestration.
-- ML: feature engineering, training, inference, evaluation.
-- Optimization: constrained procurement decisions.
-- Persistence: products, suppliers, sales, inventory snapshots, forecasts, recommendations.
+Decision services:
+- Demand baseline: scikit-learn linear trend blended with recent mean.
+- Stock risk: interpretable days-of-cover rule.
+- Replenishment: lead-time demand plus safety buffer.
 
-Initial local development can use SQLite. Configure PostgreSQL later through DATABASE_URL.
+These are initial baselines. Real model training/evaluation requires historical SKU-level sales data, chronological validation, and explicit metrics. Demo values and in-sample MAE are not operational guarantees.
