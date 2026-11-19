@@ -165,3 +165,31 @@ body{background:radial-gradient(ellipse at 15% 15%,#111812 0,#080a09 50%,#060707
 .category-track{height:7px;background:#242b23;border-radius:8px;overflow:hidden}
 .category-track i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#769d3f,#b8f34b)}
 @media(max-width:800px){.analytics-columns{grid-template-columns:1fr}}
+
+/* Operational modules: real sales, suppliers and purchase orders */
+.module-stack{display:flex;flex-direction:column;gap:16px}
+.module-panel{padding:22px}
+.module-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end}
+.module-form label,.procurement-create label{display:flex;flex-direction:column;gap:7px;color:#aeb8aa;font-size:10px}
+.module-form input,.module-form select,.procurement-create select{width:100%;min-width:0;border:1px solid #303a30;border-radius:9px;background:#0d110e;color:#e7eee2;padding:11px 12px;font:inherit;font-size:12px;outline:none}
+.module-form input:focus,.module-form select:focus,.procurement-create select:focus{border-color:#8eaf58;box-shadow:0 0 0 3px #b8f34b14}
+.module-form button{min-height:39px}
+.module-error{padding:10px 12px;border:1px solid #75463d;background:#2b1b18;color:#ffc1b3;border-radius:8px;font-size:11px}
+.module-hint{color:#9ba697;font-size:11px}
+.supplier-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.supplier-card{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);min-width:0}
+.supplier-card>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.supplier-card strong{font-size:12px}.supplier-card small{font-size:10px;color:#939d90;overflow-wrap:anywhere}
+.supplier-lead{white-space:nowrap;font-size:10px;color:#c4e98c;background:#28331f;border-radius:20px;padding:6px 9px}
+.procurement-create{display:flex;align-items:end;gap:14px}.procurement-create label{width:min(340px,100%)}
+.po-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.po-card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:15px;min-width:0}
+.po-top,.po-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.po-top>div{display:flex;flex-direction:column;gap:5px}.po-top strong{font-size:12px}.po-top small{font-size:10px;color:#929c90}
+.po-status{font-size:9px;text-transform:uppercase;letter-spacing:.8px;padding:5px 8px;border-radius:20px;background:#273322;color:#c7ee8c}
+.po-status.sent{background:#263142;color:#a8caff}.po-status.received{background:#24382a;color:#a5e6b0}.po-status.cancelled{background:#3b2725;color:#f2b0a3}
+.po-lines{display:flex;flex-direction:column;gap:5px;padding:13px 0;color:#aab4a7;font-size:10px}
+.po-bottom{border-top:1px solid var(--line);padding-top:11px}.po-bottom>strong{font-size:13px}.po-bottom>div{display:flex;gap:7px}
+.po-bottom .button{font-size:10px;padding:8px 10px}
+@media(max-width:900px){.module-form{grid-template-columns:repeat(2,minmax(0,1fr))}.po-list,.supplier-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.module-form{grid-template-columns:1fr}.procurement-create{align-items:stretch;flex-direction:column}.supplier-card{flex-wrap:wrap}.po-bottom{align-items:flex-start;flex-direction:column}}
