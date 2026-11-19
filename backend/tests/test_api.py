@@ -139,3 +139,66 @@ def test_product_validation_rejects_negative_stock_and_cost(client):
                     {"sku": "NEG-COST", "name": "Bad", "unit_cost": -1}):
         response = client.post("/api/v1/products", headers=headers, json=payload)
         assert response.status_code == 422
+
+
+def test_sales_reduce_stock_and_are_persisted(client):
+    token = register(client)
+    headers = auth(token)
+    product = client.post("/api/v1/products", headers=headers, json={
+        "sku": "SALE-1", "name": "Sale item", "stock": 12, "unit_cost": 50,
+    }).json()
+    sale = client.post("/api/v1/sales", headers=headers, json={
+        "product_id": product["id"], "quantity": 3, "unit_price": 75, "reference": "INV-100",
+    })
+    assert sale.status_code == 201
+    assert sale.json()["stock_remaining"] == 9
+    assert sale.json()["revenue"] == 225
+    assert client.get("/api/v1/sales", headers=headers).json()[0]["reference"] == "INV-100"
+    assert client.get("/api/v1/sales/summary", headers=headers).json()["units_sold"] == 3
+
+
+def test_sale_cannot_overdraw_inventory(client):
+    token = register(client)
+    headers = auth(token)
+    product = client.post("/api/v1/products", headers=headers, json={
+        "sku": "SALE-2", "name": "Limited item", "stock": 2,
+    }).json()
+    response = client.post("/api/v1/sales", headers=headers, json={
+        "product_id": product["id"], "quantity": 3,
+    })
+    assert response.status_code == 409
+
+
+def test_supplier_purchase_order_and_receipt_workflow(client):
+    token = register(client)
+    headers = auth(token)
+    supplier = client.post("/api/v1/suppliers", headers=headers, json={
+        "name": "Reliable Supply Co", "lead_time_days": 5,
+    })
+    assert supplier.status_code == 201
+    product = client.post("/api/v1/products", headers=headers, json={
+        "sku": "PO-1", "name": "Restock item", "stock": 4, "unit_cost": 20,
+    }).json()
+    order = client.post("/api/v1/purchase-orders", headers=headers, json={
+        "supplier_id": supplier.json()["id"],
+        "items": [{"product_id": product["id"], "quantity": 8, "unit_cost": 18}],
+    })
+    assert order.status_code == 201
+    assert order.json()["total"] == 144
+    sent = client.patch(f"/api/v1/purchase-orders/{order.json()['id']}", headers=headers, json={"status": "sent"})
+    assert sent.status_code == 200
+    received = client.post(f"/api/v1/purchase-orders/{order.json()['id']}/receive", headers=headers)
+    assert received.status_code == 200
+    assert received.json()["status"] == "received"
+    assert client.get("/api/v1/products", headers=headers).json()[0]["stock"] == 12
+    assert client.post(f"/api/v1/purchase-orders/{order.json()['id']}/receive", headers=headers).status_code == 409
+
+
+def test_supplier_and_purchase_orders_are_workspace_scoped(client):
+    token = register(client)
+    headers = auth(token)
+    supplier = client.post("/api/v1/suppliers", headers=headers, json={"name": "Private Supplier"})
+    other = auth(register(client, "other@example.com"))
+    assert client.get("/api/v1/suppliers", headers=other).json() == []
+    assert client.get("/api/v1/purchase-orders", headers=other).json() == []
+    assert client.delete(f"/api/v1/suppliers/{supplier.json()['id']}", headers=other).status_code == 404
