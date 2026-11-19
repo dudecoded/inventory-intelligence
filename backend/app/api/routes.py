@@ -267,6 +267,11 @@ def record_sale(payload: SaleCreate, user: User = Depends(current_user), db: Ses
     tx = InventoryTransaction(product_id=product.id, owner_id=user.id, transaction_type="sale", quantity=payload.quantity, unit_price=payload.unit_price or product.unit_cost, reference=payload.reference, notes=payload.notes)
     db.add(tx)
     db.commit()
+    from datetime import datetime, timedelta
+    since = datetime.utcnow() - timedelta(days=30)
+    recent_demand = db.scalar(select(func.coalesce(func.sum(InventoryTransaction.quantity), 0)).where(InventoryTransaction.owner_id == user.id, InventoryTransaction.product_id == product.id, InventoryTransaction.transaction_type == "sale", InventoryTransaction.occurred_at >= since))
+    product.demand_30d = float(recent_demand or 0)
+    db.commit()
     db.refresh(tx)
     return {"id": tx.id, "product_id": product.id, "sku": product.sku, "quantity": tx.quantity, "unit_price": tx.unit_price, "revenue": round(tx.quantity * tx.unit_price, 2), "stock_remaining": product.stock, "occurred_at": tx.occurred_at}
 
@@ -391,3 +396,17 @@ def receive_purchase_order(order_id: int, user: User = Depends(current_user), db
 def list_inventory_transactions(user: User = Depends(current_user), db: Session = Depends(get_db), limit: int = Query(default=100, ge=1, le=500)):
     rows = db.execute(select(InventoryTransaction, Product).join(Product, Product.id == InventoryTransaction.product_id).where(InventoryTransaction.owner_id == user.id).order_by(InventoryTransaction.occurred_at.desc()).limit(limit)).all()
     return [{"id": tx.id, "sku": product.sku, "product_name": product.name, "type": tx.transaction_type, "quantity": tx.quantity, "unit_price": tx.unit_price, "reference": tx.reference, "notes": tx.notes, "occurred_at": tx.occurred_at} for tx, product in rows]
+
+
+@api_router.get("/sales/trend", tags=["sales"])
+def sales_trend(user: User = Depends(current_user), db: Session = Depends(get_db), days: int = Query(default=30, ge=7, le=90)):
+    from datetime import datetime, timedelta
+    start = datetime.utcnow() - timedelta(days=days - 1)
+    rows = db.execute(select(func.date(InventoryTransaction.occurred_at), func.sum(InventoryTransaction.quantity), func.sum(InventoryTransaction.quantity * InventoryTransaction.unit_price)).where(InventoryTransaction.owner_id == user.id, InventoryTransaction.transaction_type == "sale", InventoryTransaction.occurred_at >= start).group_by(func.date(InventoryTransaction.occurred_at)).order_by(func.date(InventoryTransaction.occurred_at))).all()
+    indexed = {str(day): {"units": int(units), "revenue": round(float(revenue), 2)} for day, units, revenue in rows}
+    from datetime import date
+    series = []
+    for offset in range(days):
+        day = (start.date() + timedelta(days=offset)).isoformat()
+        series.append({"date": day, **indexed.get(day, {"units": 0, "revenue": 0})})
+    return {"days": days, "source": "recorded_sales", "total_units": sum(x["units"] for x in series), "total_revenue": round(sum(x["revenue"] for x in series), 2), "series": series}
