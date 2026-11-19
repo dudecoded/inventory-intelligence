@@ -9,7 +9,8 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.models import User, Product, Supplier, InventoryTransaction, PurchaseOrder, PurchaseOrderItem
 from app.schemas import (
     RegisterRequest, LoginRequest, TokenOut, UserOut, UserUpdate,
-    ProductCreate, ProductUpdate, ProductOut, ProductAdjust, ForecastRequest,\n    SupplierCreate, SaleCreate, PurchaseOrderCreate, PurchaseOrderStatusUpdate,
+    ProductCreate, ProductUpdate, ProductOut, ProductAdjust, ForecastRequest,
+    SupplierCreate, SaleCreate, PurchaseOrderCreate, PurchaseOrderStatusUpdate,
 )
 from app.services.forecasting import forecast_series, classify_stock, recommend_reorder
 
