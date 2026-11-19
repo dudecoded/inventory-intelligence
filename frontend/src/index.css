@@ -203,3 +203,7 @@ body{background:radial-gradient(ellipse at 15% 15%,#111812 0,#080a09 50%,#060707
 .no-sales-chart{height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#82907c;text-align:center}
 .no-sales-chart strong{font-size:13px;color:#cbd5c5}.no-sales-chart span{max-width:320px;font-size:10px;line-height:1.6}
 .chart-legend>strong{margin-left:auto;color:#c8e99a;font-size:10px}
+
+.module-form .checkbox-label{display:flex;flex-direction:row;align-items:center;gap:9px;grid-column:span 2;padding:10px 12px;border:1px solid #394735;border-radius:9px;background:#151d15;color:#b8c5b0}
+.module-form .checkbox-label input{width:15px;height:15px;accent-color:#b8f34b}
+@media(max-width:560px){.module-form .checkbox-label{grid-column:span 1}}
