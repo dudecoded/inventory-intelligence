@@ -5,10 +5,13 @@ Inventory decision-support platform for small businesses and operations teams. T
 ## What works today
 - Email/password registration and login; passwords are stored using scrypt, not plaintext.
 - Signed bearer tokens with expiry.
-- User-scoped inventory CRUD, guarded stock adjustments, stock-movement audit history, and archive.\n- Recorded sales ledger: sales decrement stock, reject overselling, update rolling 30-day demand, and drive live sales analytics.
+- User-scoped inventory CRUD, guarded stock adjustments, stock-movement audit history, and archive.
+- Recorded sales ledger: sales decrement stock, reject overselling, update rolling 30-day demand, and drive live sales analytics.
 - SKU normalization and duplicate checks within a workspace.
 - Inventory valuation from on-hand quantity × unit cost.
-- Supplier directory with contact and lead-time details.\n- Persistent supplier-linked purchase orders with draft/sent/received/cancelled states; receiving an order updates inventory exactly once and records the receipt.\n- SKU-level daily sales history and forecasts using recorded sales, plus a live daily sales trend.
+- Supplier directory with contact and lead-time details.
+- Persistent supplier-linked purchase orders with draft/sent/received/cancelled states; receiving an order updates inventory exactly once and records the receipt.
+- SKU-level daily sales history and forecasts using recorded sales, plus a live daily sales trend.
 - Forecast lab that compares naive, moving-average, and linear-trend baselines using a chronological holdout.
 - CSV import/export with validation and formula-injection protection. Sample import template: `docs/inventory-import-template.csv`.
 - Backend API integration tests and frontend production build in CI.
