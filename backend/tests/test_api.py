@@ -202,3 +202,21 @@ def test_supplier_and_purchase_orders_are_workspace_scoped(client):
     assert client.get("/api/v1/suppliers", headers=other).json() == []
     assert client.get("/api/v1/purchase-orders", headers=other).json() == []
     assert client.delete(f"/api/v1/suppliers/{supplier.json()['id']}", headers=other).status_code == 404
+
+
+def test_recorded_sales_update_rolling_demand_and_trend(client):
+    token = register(client)
+    headers = auth(token)
+    product = client.post("/api/v1/products", headers=headers, json={
+        "sku": "TREND-1", "name": "Trend item", "stock": 20, "demand_30d": 0,
+    }).json()
+    sale = client.post("/api/v1/sales", headers=headers, json={
+        "product_id": product["id"], "quantity": 4, "unit_price": 12,
+    })
+    assert sale.status_code == 201
+    refreshed = client.get("/api/v1/products", headers=headers).json()[0]
+    assert refreshed["demand_30d"] == 4
+    trend = client.get("/api/v1/sales/trend?days=7", headers=headers).json()
+    assert trend["source"] == "recorded_sales"
+    assert trend["total_units"] == 4
+    assert len(trend["series"]) == 7
