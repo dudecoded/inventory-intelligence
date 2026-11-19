@@ -261,10 +261,15 @@ def archive_supplier(supplier_id: int, user: User = Depends(current_user), db: S
 @api_router.post("/sales", status_code=201, tags=["sales"])
 def record_sale(payload: SaleCreate, user: User = Depends(current_user), db: Session = Depends(get_db)):
     product = _owned_active_product(db, user.id, payload.product_id)
-    if payload.quantity > product.stock:
+    if payload.affects_stock and payload.quantity > product.stock:
         raise HTTPException(status_code=409, detail=f"Insufficient stock: {product.stock} units available")
-    product.stock -= payload.quantity
-    tx = InventoryTransaction(product_id=product.id, owner_id=user.id, transaction_type="sale", quantity=payload.quantity, unit_price=payload.unit_price or product.unit_cost, reference=payload.reference, notes=payload.notes)
+    if payload.affects_stock:
+        product.stock -= payload.quantity
+    occurred_at = payload.occurred_at
+    if occurred_at is not None and occurred_at.tzinfo is not None:
+        from datetime import timezone
+        occurred_at = occurred_at.astimezone(timezone.utc).replace(tzinfo=None)
+    tx = InventoryTransaction(product_id=product.id, owner_id=user.id, transaction_type="sale", quantity=payload.quantity, unit_price=payload.unit_price or product.unit_cost, reference=payload.reference, notes=payload.notes, occurred_at=occurred_at)
     db.add(tx)
     db.commit()
     from datetime import datetime, timedelta
@@ -273,7 +278,7 @@ def record_sale(payload: SaleCreate, user: User = Depends(current_user), db: Ses
     product.demand_30d = float(recent_demand or 0)
     db.commit()
     db.refresh(tx)
-    return {"id": tx.id, "product_id": product.id, "sku": product.sku, "quantity": tx.quantity, "unit_price": tx.unit_price, "revenue": round(tx.quantity * tx.unit_price, 2), "stock_remaining": product.stock, "occurred_at": tx.occurred_at}
+    return {"id": tx.id, "product_id": product.id, "sku": product.sku, "quantity": tx.quantity, "unit_price": tx.unit_price, "revenue": round(tx.quantity * tx.unit_price, 2), "stock_remaining": product.stock, "stock_adjusted": payload.affects_stock, "occurred_at": tx.occurred_at}
 
 
 @api_router.get("/sales", tags=["sales"])
