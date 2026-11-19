@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Annotated, Optional
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -138,7 +138,8 @@ class ProductAdjust(BaseModel):
 
 
 class ForecastRequest(BaseModel):
-    history: list[float] = Field(min_length=3, max_length=365, allow_inf_nan=False)
+    # Apply finite-number validation to each history item, not the list container.
+    history: list[Annotated[float, Field(allow_inf_nan=False)]] = Field(min_length=3, max_length=365)
     horizon: int = Field(default=7, ge=1, le=90)
 
     @field_validator("history")
