@@ -87,7 +87,7 @@ def test_product_crud_and_dashboard_summary(client):
     summary = client.get("/api/v1/dashboard/summary", headers=headers)
     assert summary.status_code == 200
     assert summary.json()["active_products"] == 1
-    assert summary.json()["inventory_value"] == 0
+    assert summary.json()["inventory_value"] == 250
 
     archived = client.delete(f"/api/v1/products/{product['id']}", headers=headers)
     assert archived.status_code == 200
