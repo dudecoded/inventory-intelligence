@@ -21,12 +21,12 @@
 - Explain MAE/RMSE/WAPE and that the selected baseline is chosen on a holdout—not by in-sample fit.
 - State the limitation: the demo series is illustrative and small; real deployment needs dated SKU sales and stockout-aware validation.
 
-## 4. Procurement (45 seconds)
+## 5. Procurement (45 seconds)
 - Show the low-stock recommendations.
 - Explain the transparent calculation: average daily demand × (lead time + safety buffer), less stock on hand.
-- Adjust order quantities and save a purchase-order draft. Drafts are currently browser-local.
+- Adjust order quantities and save a purchase order, mark it sent, and receive it. Receiving updates stock and is protected against duplicate receipt.
 
-## 5. Analytics (30 seconds)
+## 6. Analytics (30 seconds)
 - Show category inventory valuation and stock-health distribution.
 - Explain what the platform deliberately does not claim yet: turnover and historical stockout metrics require transaction history.
 
