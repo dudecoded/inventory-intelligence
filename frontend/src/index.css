@@ -199,3 +199,7 @@ body{background:radial-gradient(ellipse at 15% 15%,#111812 0,#080a09 50%,#060707
 .recorded-forecast select{background:#0c110d;color:#e8eee4;border:1px solid #394735;border-radius:8px;padding:10px}
 .recorded-forecast>span{font-size:9px;color:#8f9a8b;padding-bottom:10px}
 @media(max-width:650px){.recorded-forecast{align-items:stretch;flex-direction:column}.recorded-forecast label{min-width:0}}
+
+.no-sales-chart{height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#82907c;text-align:center}
+.no-sales-chart strong{font-size:13px;color:#cbd5c5}.no-sales-chart span{max-width:320px;font-size:10px;line-height:1.6}
+.chart-legend>strong{margin-left:auto;color:#c8e99a;font-size:10px}
