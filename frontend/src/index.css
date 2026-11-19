@@ -193,3 +193,9 @@ body{background:radial-gradient(ellipse at 15% 15%,#111812 0,#080a09 50%,#060707
 .po-bottom .button{font-size:10px;padding:8px 10px}
 @media(max-width:900px){.module-form{grid-template-columns:repeat(2,minmax(0,1fr))}.po-list,.supplier-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.module-form{grid-template-columns:1fr}.procurement-create{align-items:stretch;flex-direction:column}.supplier-card{flex-wrap:wrap}.po-bottom{align-items:flex-start;flex-direction:column}}
+
+.recorded-forecast{display:flex;align-items:end;gap:12px;padding:14px;border:1px solid #394735;background:#172017;border-radius:12px;margin:14px 0}
+.recorded-forecast label{display:flex;flex-direction:column;gap:7px;min-width:240px;color:#c4d0bc;font-size:10px}
+.recorded-forecast select{background:#0c110d;color:#e8eee4;border:1px solid #394735;border-radius:8px;padding:10px}
+.recorded-forecast>span{font-size:9px;color:#8f9a8b;padding-bottom:10px}
+@media(max-width:650px){.recorded-forecast{align-items:stretch;flex-direction:column}.recorded-forecast label{min-width:0}}
