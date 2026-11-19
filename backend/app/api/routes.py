@@ -162,7 +162,11 @@ def update_product(product_id: int, payload: ProductUpdate, user: User = Depends
 @api_router.patch("/products/{product_id}/stock", response_model=ProductOut, tags=["inventory"])
 def adjust_stock(product_id: int, payload: ProductAdjust, user: User = Depends(current_user), db: Session = Depends(get_db)):
     product = _owned_active_product(db, user.id, product_id)
-    product.stock = max(0, product.stock + payload.delta)
+    next_stock = product.stock + payload.delta
+    if next_stock < 0:
+        raise HTTPException(status_code=409, detail=f"Insufficient stock: {product.stock} units available")
+    product.stock = next_stock
+    db.add(InventoryTransaction(product_id=product.id, owner_id=user.id, transaction_type="adjustment", quantity=abs(payload.delta), unit_price=product.unit_cost, reference="MANUAL", notes="Manual stock adjustment: " + str(payload.delta)))
     db.commit()
     db.refresh(product)
     return product
