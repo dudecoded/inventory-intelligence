@@ -262,8 +262,11 @@ def test_manual_forecast_endpoint_accepts_history_and_rejects_invalid_values(cli
     })
     assert negative.status_code == 422
 
-    non_finite = client.post("/api/v1/ml/forecast", headers=headers, json={
-        "history": [12, float("nan"), 13],
-        "horizon": 7,
-    })
-    assert non_finite.status_code == 422
+    # NaN is not valid JSON, so test finite-number validation at the schema boundary.
+    from pydantic import ValidationError
+    from app.schemas import ForecastRequest
+    with pytest.raises(ValidationError):
+        ForecastRequest.model_validate({
+            "history": [12, float("nan"), 13],
+            "horizon": 7,
+        })
