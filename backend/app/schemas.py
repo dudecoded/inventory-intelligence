@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -168,6 +169,8 @@ class SaleCreate(BaseModel):
     unit_price: float = Field(default=0, ge=0, allow_inf_nan=False)
     reference: str = Field(default="", max_length=120)
     notes: str = Field(default="", max_length=500)
+    occurred_at: datetime | None = None
+    affects_stock: bool = True
 
 
 class PurchaseOrderLineCreate(BaseModel):
