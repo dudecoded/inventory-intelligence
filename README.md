@@ -14,7 +14,7 @@ Inventory decision-support platform for small businesses and operations teams. T
 - SKU-level daily sales history and forecasts using recorded sales, plus a live daily sales trend.
 - Forecast lab that compares naive, moving-average, and linear-trend baselines using a chronological holdout.
 - CSV import/export with validation and formula-injection protection. Sample import template: `docs/inventory-import-template.csv`.
-- Backend API integration tests and frontend production build in CI.
+- Backend API integration tests and frontend production build in CI (24 backend tests passing on the latest verified application commit).
 
 ## Important limitations
 This is a hackathon prototype, not a production inventory system. Demo inventory is illustrative and may be seeded into a new workspace. The Overview sales trend is populated only from recorded transactions. New workspaces may be seeded with illustrative catalogue items, but sales are never fabricated. Forecast baselines are simple and require sufficient recorded demand; they are not deep-learning forecasts. Stock risk and reorder quantities are transparent heuristics, not optimized or probabilistic decisions. External ERP integrations, multi-warehouse operations, supplier performance scoring, returns, taxes, and advanced demand seasonality remain outside the current prototype.
