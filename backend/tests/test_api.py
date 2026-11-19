@@ -220,3 +220,26 @@ def test_recorded_sales_update_rolling_demand_and_trend(client):
     assert trend["source"] == "recorded_sales"
     assert trend["total_units"] == 4
     assert len(trend["series"]) == 7
+
+
+def test_historical_sales_can_train_forecast_without_changing_current_stock(client):
+    from datetime import datetime, timedelta
+    token = register(client)
+    headers = auth(token)
+    product = client.post("/api/v1/products", headers=headers, json={
+        "sku": "HIST-1", "name": "History item", "stock": 50, "unit_cost": 10,
+    }).json()
+    for offset, quantity in enumerate((4, 6, 5, 8, 7)):
+        occurred = (datetime.utcnow() - timedelta(days=offset + 3)).isoformat()
+        response = client.post("/api/v1/sales", headers=headers, json={
+            "product_id": product["id"], "quantity": quantity, "unit_price": 15,
+            "occurred_at": occurred, "affects_stock": False,
+        })
+        assert response.status_code == 201
+        assert response.json()["stock_adjusted"] is False
+    refreshed = client.get("/api/v1/products", headers=headers).json()[0]
+    assert refreshed["stock"] == 50
+    assert refreshed["demand_30d"] == 30
+    forecast = client.post(f"/api/v1/ml/forecast/product/{product['id']}?days=30&horizon=7", headers=headers)
+    assert forecast.status_code == 200
+    assert forecast.json()["source"] == "recorded_daily_sales"
