@@ -5,16 +5,16 @@ Inventory decision-support platform for small businesses and operations teams. T
 ## What works today
 - Email/password registration and login; passwords are stored using scrypt, not plaintext.
 - Signed bearer tokens with expiry.
-- User-scoped inventory CRUD, stock adjustments, and archive.
+- User-scoped inventory CRUD, guarded stock adjustments, stock-movement audit history, and archive.\n- Recorded sales ledger: sales decrement stock, reject overselling, update rolling 30-day demand, and drive live sales analytics.
 - SKU normalization and duplicate checks within a workspace.
 - Inventory valuation from on-hand quantity × unit cost.
-- Stock coverage / reorder recommendations with explicit assumptions.
+- Supplier directory with contact and lead-time details.\n- Persistent supplier-linked purchase orders with draft/sent/received/cancelled states; receiving an order updates inventory exactly once and records the receipt.\n- SKU-level daily sales history and forecasts using recorded sales, plus a live daily sales trend.
 - Forecast lab that compares naive, moving-average, and linear-trend baselines using a chronological holdout.
 - CSV import/export with validation and formula-injection protection. Sample import template: `docs/inventory-import-template.csv`.
 - Backend API integration tests and frontend production build in CI.
 
 ## Important limitations
-This is a hackathon prototype, not a production inventory system. Demo inventory is illustrative and may be seeded into a new workspace. The chart on the Overview page is sample visualization and is not connected to sales history. The forecast lab accepts manually entered observations; it is not trained on a real business dataset. Stock risk and reorder quantities are transparent heuristics, not optimized or probabilistic decisions. Supplier, integrations, and some analytics screens remain UI placeholders.
+This is a hackathon prototype, not a production inventory system. Demo inventory is illustrative and may be seeded into a new workspace. The Overview sales trend is populated only from recorded transactions. New workspaces may be seeded with illustrative catalogue items, but sales are never fabricated. Forecast baselines are simple and require sufficient recorded demand; they are not deep-learning forecasts. Stock risk and reorder quantities are transparent heuristics, not optimized or probabilistic decisions. External ERP integrations, multi-warehouse operations, supplier performance scoring, returns, taxes, and advanced demand seasonality remain outside the current prototype.
 
 ## Stack
 - Frontend: React, TypeScript, Vite, CSS
