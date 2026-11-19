@@ -243,3 +243,27 @@ def test_historical_sales_can_train_forecast_without_changing_current_stock(clie
     forecast = client.post(f"/api/v1/ml/forecast/product/{product['id']}?days=30&horizon=7", headers=headers)
     assert forecast.status_code == 200
     assert forecast.json()["source"] == "recorded_daily_sales"
+
+def test_manual_forecast_endpoint_accepts_history_and_rejects_invalid_values(client):
+    token = register(client)
+    headers = auth(token)
+
+    response = client.post("/api/v1/ml/forecast", headers=headers, json={
+        "history": [12, 15, 13, 17, 18, 16, 21, 19, 24, 26, 25, 29],
+        "horizon": 14,
+    })
+    assert response.status_code == 200
+    assert len(response.json()["forecast"]) == 14
+    assert response.json()["method"]
+
+    negative = client.post("/api/v1/ml/forecast", headers=headers, json={
+        "history": [12, -1, 13],
+        "horizon": 7,
+    })
+    assert negative.status_code == 422
+
+    non_finite = client.post("/api/v1/ml/forecast", headers=headers, json={
+        "history": [12, float("nan"), 13],
+        "horizon": 7,
+    })
+    assert non_finite.status_code == 422
