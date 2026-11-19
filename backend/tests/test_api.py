@@ -77,8 +77,8 @@ def test_product_crud_and_dashboard_summary(client):
     assert duplicate.status_code == 409
 
     adjusted = client.patch(f"/api/v1/products/{product['id']}/stock", headers=headers, json={"delta": -15})
-    assert adjusted.status_code == 200
-    assert adjusted.json()["stock"] == 0
+    assert adjusted.status_code == 409
+    assert client.get("/api/v1/products", headers=headers).json()[0]["stock"] == 10
 
     updated = client.patch(f"/api/v1/products/{product['id']}", headers=headers, json={"name": "Updated Widget"})
     assert updated.status_code == 200
